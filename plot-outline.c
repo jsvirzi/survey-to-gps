@@ -42,6 +42,7 @@ survey_point_t points[] = {
     { 44.83, "S", 88, 55, 26, "E", NULL },
     { 32.64, "S", 24, 52, 19, "E", NULL },
     { 69.26, "S", 76, 7, 39, "E", NULL },
+    { 30.56, "N", 71, 48, 32, "E", "missing" }, /* on map, but not deed */
     { 109.24, "N", 80, 30, 1, "E", NULL },
 //    { 228.71, "N", 60, 55, 30, "W", NULL }, /* orientation? */
     { 228.71, "S", 60, 55, 30, "E", NULL },

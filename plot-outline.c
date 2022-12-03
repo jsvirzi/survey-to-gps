@@ -39,17 +39,46 @@ double haversin(double lat1, double lon1, double lat2, double lon2)
 }
 
 int main(int argc, char **argv) {
-	survey_point_t *p = points;
+
+    char *filename = "property.csv";
+    FILE *fp = fopen(filename, "w");
+
+#if 0
+    NEBRASKA, USA (Latitude : 41.507483, longitude : -99.436554) and
+    KANSAS, USA (Latitude : 38.504048, Longitude : -98.315949)
+    WEST VIRGINIA (Latitude : 37.765712, Longitude : -80.849270)
+#endif
+
+    double lat1 = 37.765712, lat2;
+    double lon1 = -80.849270, lon2;
+    double hlat = 0.000001;
+    double hlon = 0.000001;
+
+    lat2 = lat1;
+    lon2 = lon1 + hlon;
+    double dlon0 = haversin(lat1, lon1, lat2, lon2);
+
+    lat2 = lat1 + hlat;
+    lon2 = lon1;
+    double dlat0 = haversin(lat1, lon1, lat2, lon2);
+    printf("haversin = %f, %f\n", dlat0, dlon0);
+
+    survey_point_t *p = points;
 	double x0 = 0.0;
 	double y0 = 0.0;
 	double x = x0;
 	double y = y0;
+    double lat = 37.76006;
+    double lon = -80.85040;
 	int k = 0;
+    fprintf(fp, "id, lat, lon\n");
 	for (p = points; p->distance > 0.0; ++p, ++k) {
+        printf("%d: x=%f, y=%f. gps = (%f, %f)\n", k, x, y, lat, lon);
+        fprintf(fp, "%d, %f, %f\n", k, lat, lon);
 		double degrees = p->degrees + p->minutes / 60.0 + p->seconds / 3600.0;
 		double radians = M_PI * degrees / 180.0;
-		double dx = p->distance * cos(radians);
-		double dy = p->distance * sin(radians);
+		double dx = p->distance * sin(radians);
+		double dy = p->distance * cos(radians);
 		if (strcmp(p->dir, "NW") == 0) {
 			dx = -dx;
 		} else if (strcmp(p->dir, "SW") == 0) {
@@ -61,25 +90,15 @@ int main(int argc, char **argv) {
 		}
 		x += dx;
 		y += dy;
-		printf("%d: x=%f, y=%f\n", k, x, y); 
+        double dlat = hlat * dy / dlat0;
+        double dlon = hlon * dx / dlon0;
+        double distance = haversin(lat + dlat, lon + dlon, lat, lon);
+        printf("distances = %f vs %f\n", distance, p->distance);
+        lat += dlat;
+        lon += dlon;
 	}
 
-#if 0
-    NEBRASKA, USA (Latitude : 41.507483, longitude : -99.436554) and
-    KANSAS, USA (Latitude : 38.504048, Longitude : -98.315949)
-#endif
-    double lon1 = -99.436554;
-    double lon2 = -98.315949;
-    double lat1 = 41.507483;
-    double lat2 = 38.504048;
-
-    lat1 = 37.765712;
-    lon1 = -80.849270;
-    lat2 = lat1 + 0.000001;
-    lon2 = lon1;
-
-    double d = haversin(lat1, lon1, lat2, lon2);
-    printf("haversin = %f\n", d);
+    fclose(fp);
 
 	return 0;
 }

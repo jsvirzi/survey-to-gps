@@ -171,36 +171,38 @@ int main(int argc, char **argv) {
 //    double lon = -80.85040;
     double lat = 37.6827565;
     double lon = -80.8756773;
-    double degrees0 = -0.0;
+    double degrees0 = 8.0;
 	int k = 0;
-    fprintf(fp, "id, lat, lon\n");
-    double total_degrees = 0.0;
+    fprintf(fp, "title, latitude, longitude\n");
+    double total_degrees = .0;
 	for (p = points; p->distance > 0.0; ++p, ++k) {
         printf("%d: x=%f, y=%f. gps = (%f, %f)\n", k, x, y, lat, lon);
         if (p->description == NULL) {
             fprintf(fp, "%d, %f, %f\n", k, lat, lon);
         } else {
-            fprintf(fp, "\"%s\", %f, %f\n", p->description, lat, lon);
+            fprintf(fp, "%s, %f, %f\n", p->description, lat, lon);
         }
 		double degrees = p->degrees + p->minutes / 60.0 + p->seconds / 3600.0;
-        degrees += degrees0;
-		double radians = M_PI * degrees / 180.0;
-		double dx = p->distance * sin(radians);
-		double dy = p->distance * cos(radians);
-		if (strcmp(p->ew, "W") == 0) { dx = -dx; }
-		if (strcmp(p->ns, "S") == 0) { dy = -dy; }
-		x += dx;
-		y += dy;
+//		if (strcmp(p->ew, "W") == 0) { dx = -dx; }
+//		if (strcmp(p->ns, "S") == 0) { dy = -dy; }
         int north = (strcmp(p->ns, "N") == 0) ? 1 : 0;
         int west = (strcmp(p->ew, "W") == 0) ? 1 : 0;
-        if ((north == 1) && (west == 1)) {
-        } else if ((north == 0) && (west == 1)) {
+        if (0) {
+        } else if ((north == 1) && (west == 1)) { /* NW */
+            // degrees = - degrees;
+        } else if ((north == 0) && (west == 1)) { /* SW */
             degrees = 180.0 - degrees;
         } else if ((north == 1) && (west == 0)) {
             degrees = - degrees;
-        } else if ((north == 0) && (west == 0)) {
+        } else if ((north == 0) && (west == 0)) { /* SE */
             degrees = 180.0 + degrees;
         }
+        degrees += degrees0;
+        double radians = M_PI * degrees / 180.0;
+        double dx = -1.0 * p->distance * sin(radians);
+        double dy = +1.0 * p->distance * cos(radians);
+        x += dx;
+        y += dy;
         total_degrees += degrees;
         double dlat = hlat * dy / dlat0;
         double dlon = hlon * dx / dlon0;

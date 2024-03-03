@@ -13,6 +13,16 @@ typedef struct {
 } survey_point_t;
 
 survey_point_t points[] = {
+    { 43.0, "N", 41, 30, 0, "E", "I-20" },
+    { 81.0, "N", 15, 30, 0, "E", "I-20" },
+    { 133.0, "N", 2, 30, 0, "W", "I-20" },
+    { 30.0, "N", 84, 30, 0, "W", "I-20" },
+    { 159.0, "N", 84, 30, 0, "W", "I-20" },
+    { 298.0, "S", 28, 24, 0, "E", "I-20" },
+    { 0.0 }
+};
+
+survey_point_t points_hinton[] = {
     { 90.0, "S", 14, 47, 0, "W", "I-20" },
     { 80.0, "S", 88, 06, 0, "W", NULL },
     { 183.76, "N", 40, 02, 0, "W", NULL },
@@ -169,9 +179,12 @@ int main(int argc, char **argv) {
 	double y = y0;
 //    double lat = 37.76006;
 //    double lon = -80.85040;
-    double lat = 37.6827565;
-    double lon = -80.8756773;
+//    double lat = 37.6827565;
+//    double lon = -80.8756773;
+    double lat = 37.681791810;
+    double lon = -80.875952850;
     double degrees0 = 8.0;
+    degrees0 = -10.0;
 	int k = 0;
     fprintf(fp, "title, latitude, longitude\n");
     double total_degrees = .0;

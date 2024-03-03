@@ -13,6 +13,14 @@ typedef struct {
 } survey_point_t;
 
 survey_point_t points[] = {
+    { 90.0, "S", 14, 47, 0, "W", "I-20" },
+    { 80.0, "S", 88, 06, 0, "W", NULL },
+    { 183.76, "N", 40, 02, 0, "W", NULL },
+    { 226.92, "S", 77, 0, 0, "E", NULL },
+    { 0.0 }
+};
+
+survey_point_t points_mountain[] = {
 	{ 1584.76, "N", 21, 29, 21, "W", NULL },
 	{ 884.45, "N", 22, 5, 12, "W", NULL },
 	{ 514.36, "N", 24, 36, 14, "E", NULL },
@@ -119,6 +127,24 @@ double haversin(double lat1, double lon1, double lat2, double lon2)
 int main(int argc, char **argv) {
 
     char *filename = "property.csv";
+
+//    double lat1 = 37.765712, lat2; /* mountain */
+//    double lon1 = -80.849270, lon2; /* mountain */
+    double lat1 = 37.682496, lat2;
+    double lon1 = -80.875782, lon2;
+    double hlat = 0.000001;
+    double hlon = 0.000001;
+
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "-o") == 0) {
+            filename = argv[++i];
+        } else if (strcmp(argv[i], "-lat") == 0) {
+            snprintf(argv[++i], "%f", &lat1);
+        } else if (strcmp(argv[i], "-lon") == 0) {
+            snprintf(argv[++i], "%f", &lon1);
+        }
+    }
+
     FILE *fp = fopen(filename, "w");
 
 #if 0
@@ -126,11 +152,6 @@ int main(int argc, char **argv) {
     KANSAS, USA (Latitude : 38.504048, Longitude : -98.315949)
     WEST VIRGINIA (Latitude : 37.765712, Longitude : -80.849270)
 #endif
-
-    double lat1 = 37.765712, lat2;
-    double lon1 = -80.849270, lon2;
-    double hlat = 0.000001;
-    double hlon = 0.000001;
 
     lat2 = lat1;
     lon2 = lon1 + hlon;
@@ -146,8 +167,11 @@ int main(int argc, char **argv) {
 	double y0 = 0.0;
 	double x = x0;
 	double y = y0;
-    double lat = 37.76006;
-    double lon = -80.85040;
+//    double lat = 37.76006;
+//    double lon = -80.85040;
+    double lat = 37.6827565;
+    double lon = -80.8756773;
+    double degrees0 = -0.0;
 	int k = 0;
     fprintf(fp, "id, lat, lon\n");
     double total_degrees = 0.0;
@@ -159,7 +183,7 @@ int main(int argc, char **argv) {
             fprintf(fp, "\"%s\", %f, %f\n", p->description, lat, lon);
         }
 		double degrees = p->degrees + p->minutes / 60.0 + p->seconds / 3600.0;
-        total_degrees += degrees;
+        degrees += degrees0;
 		double radians = M_PI * degrees / 180.0;
 		double dx = p->distance * sin(radians);
 		double dy = p->distance * cos(radians);
@@ -167,6 +191,17 @@ int main(int argc, char **argv) {
 		if (strcmp(p->ns, "S") == 0) { dy = -dy; }
 		x += dx;
 		y += dy;
+        int north = (strcmp(p->ns, "N") == 0) ? 1 : 0;
+        int west = (strcmp(p->ew, "W") == 0) ? 1 : 0;
+        if ((north == 1) && (west == 1)) {
+        } else if ((north == 0) && (west == 1)) {
+            degrees = 180.0 - degrees;
+        } else if ((north == 1) && (west == 0)) {
+            degrees = - degrees;
+        } else if ((north == 0) && (west == 0)) {
+            degrees = 180.0 + degrees;
+        }
+        total_degrees += degrees;
         double dlat = hlat * dy / dlat0;
         double dlon = hlon * dx / dlon0;
         double distance = haversin(lat + dlat, lon + dlon, lat, lon);

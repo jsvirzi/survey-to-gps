@@ -12,7 +12,37 @@ typedef struct {
     char *description;
 } survey_point_t;
 
+/*
+ * gps points according to iphone
+ *
+ * northern most point =
+ *    (37.68253 deg N, 80.87568 deg W)
+ *    (37.68252 deg N, 80.87569 deg W)
+ *
+ *  tree:
+ *    (37.68245 deg N, 80.87587 deg W)
+ *
+ *  corner:
+ *    (37.68245 deg N, 80.87587 deg W)
+ *    (37.68241 N, 80.87598 W) (2nd measurement)
+ *
+ *  lamp:
+ *    (37.682480, -80.875810) = (37.68248 N, 80.87581 W) iphone
+ *    (37.682490, -80.875780) according to google maps
+ *
+ *  road:
+ *    (37.68226, -80.87574)
+ *    (37.68240, -80.87568)
+ */
+
 survey_point_t points[] = {
+//    { 43.0, "N", 41, 30, 0, "E", "I-20" },
+//    { 81.0, "N", 15, 30, 0, "E", "I-20" },
+//    { 133.0, "N", 2, 30, 0, "W", "I-20" },
+    { 0.0 }
+};
+
+survey_point_t points_pd[] = {
     { 43.0, "N", 41, 30, 0, "E", "I-20" },
     { 81.0, "N", 15, 30, 0, "E", "I-20" },
     { 133.0, "N", 2, 30, 0, "W", "I-20" },
@@ -184,7 +214,7 @@ int main(int argc, char **argv) {
     double lat = 37.681791810;
     double lon = -80.875952850;
     double degrees0 = 8.0;
-    degrees0 = -10.0;
+    degrees0 = 0.0;
 	int k = 0;
     fprintf(fp, "title, latitude, longitude\n");
     double total_degrees = .0;

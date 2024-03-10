@@ -12,6 +12,22 @@ typedef struct {
     char *description;
 } survey_point_t;
 
+typedef struct {
+    double lat;
+    double lon;
+} gps_point_t;
+
+gps_point_t gps_points[] = {
+    { 37.68249, -80.87578 }, /* lamp post */
+    { 37.68248, -80.87590 },
+    { 37.68243, -80.87596},
+    { 37.68230, -80.87571},
+    { 37.68250, -80.87567},
+//    { 37.68243, -80.87596}, /* southern road */
+//    { 37.68243, -80.87596}, /* southern road */
+//    { 37.68252, -80.87569 }, /* northern most point, in middle of road */
+    { 0.0, 0.0 }
+};
 /*
  * gps points according to iphone
  *
@@ -164,14 +180,27 @@ double haversin(double lat1, double lon1, double lat2, double lon2)
     return d;
 }
 
+int gps_to_survey(gps_point_t *gps_pt1, gps_point_t *gps_pt2, survey_point_t *survey_pt)
+{
+    double r = haversin(gps_pt2->lat, gps_pt2->lon, gps_pt1->lat, gps_pt1->lat);
+    gps_point_t gps_point;
+    gps_point.lat = gps_pt1->lat;
+    gps_point.lat = gps_pt2->lon;
+    double c = haversin(gps_point.lat, gps_point.lat, gps_pt1->lat, gps_pt1->lon);
+    gps_point.lat = gps_pt2->lat;
+    gps_point.lat = gps_pt1->lon;
+    double s = haversin(gps_point.lat, gps_point.lat, gps_pt1->lat, gps_pt1->lon);
+    printf("distances = R=%f C=%f S=%f\n", r, c, s);
+}
+
 int main(int argc, char **argv) {
 
     char *filename = "property.csv";
 
 //    double lat1 = 37.765712, lat2; /* mountain */
 //    double lon1 = -80.849270, lon2; /* mountain */
-    double lat1 = 37.682496, lat2;
-    double lon1 = -80.875782, lon2;
+    double lat1 = 37.682496;
+    double lon1 = -80.875782;
     double hlat = 0.000001;
     double hlon = 0.000001;
 
@@ -179,19 +208,20 @@ int main(int argc, char **argv) {
         if (strcmp(argv[i], "-o") == 0) {
             filename = argv[++i];
         } else if (strcmp(argv[i], "-lat") == 0) {
-            snprintf(argv[++i], "%f", &lat1);
+            sscanf(argv[++i], "%lf", &lat1);
         } else if (strcmp(argv[i], "-lon") == 0) {
-            snprintf(argv[++i], "%f", &lon1);
+            sscanf(argv[++i], "%lf", &lon1);
         }
     }
-
-    FILE *fp = fopen(filename, "w");
 
 #if 0
     NEBRASKA, USA (Latitude : 41.507483, longitude : -99.436554) and
     KANSAS, USA (Latitude : 38.504048, Longitude : -98.315949)
     WEST VIRGINIA (Latitude : 37.765712, Longitude : -80.849270)
 #endif
+
+    double lat2;
+    double lon2;
 
     lat2 = lat1;
     lon2 = lon1 + hlon;
@@ -200,7 +230,25 @@ int main(int argc, char **argv) {
     lat2 = lat1 + hlat;
     lon2 = lon1;
     double dlat0 = haversin(lat1, lon1, lat2, lon2);
-    printf("haversin = %f, %f\n", dlat0, dlon0);
+
+    printf("haversin = %f->%f, %f->%f\n", hlat, dlat0, hlon, dlon0);
+
+    int k;
+    double lat;
+    double lon;
+    gps_point_t gps_point;
+    survey_point_t survey_point;
+
+    gps_point_t *gps = gps_points;
+    gps_point = *gps++;
+    for (; gps->lat > 0.0; ++gps) {
+        gps_to_survey(gps, &gps_point, &survey_point);
+        gps_point = *gps;
+        // printf("%d: x=%f, y=%f. gps = (%f, %f)\n", k, lat, lon);
+    }
+    return 0;
+
+    FILE *fp = fopen(filename, "w");
 
     survey_point_t *p = points;
 	double x0 = 0.0;
@@ -211,14 +259,15 @@ int main(int argc, char **argv) {
 //    double lon = -80.85040;
 //    double lat = 37.6827565;
 //    double lon = -80.8756773;
-    double lat = 37.681791810;
-    double lon = -80.875952850;
+
+/* original location. first point */
+    lat = 37.681791810;
+    lon = -80.875952850;
     double degrees0 = 8.0;
     degrees0 = 0.0;
-	int k = 0;
     fprintf(fp, "title, latitude, longitude\n");
-    double total_degrees = .0;
-	for (p = points; p->distance > 0.0; ++p, ++k) {
+    double total_degrees = 0.0;
+	for (k = 0, p = points; p->distance > 0.0; ++p, ++k) {
         printf("%d: x=%f, y=%f. gps = (%f, %f)\n", k, x, y, lat, lon);
         if (p->description == NULL) {
             fprintf(fp, "%d, %f, %f\n", k, lat, lon);
